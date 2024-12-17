@@ -1,0 +1,215 @@
+{
+	"info": {
+		"_postman_id": "8141a875-b1e2-48cd-8398-0a54047e06a7",
+		"name": "Petstore",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29407561"
+	},
+	"item": [
+		{
+			"name": "Create pet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const categories = [\r",
+							"  { \"id\": 1, \"name\": \"dinosaurs\" },\r",
+							"  { \"id\": 2, \"name\": \"birds\" },\r",
+							"  { \"id\": 3, \"name\": \"reptiles\" },\r",
+							"  { \"id\": 4, \"name\": \"dogs\" },\r",
+							"  { \"id\": 5, \"name\": \"cats\"}\r",
+							"];\r",
+							"const randomCategory = categories[Math.floor(Math.random() * categories.length)];\r",
+							"pm.environment.set(\"category\", JSON.stringify(randomCategory));\r",
+							"\r",
+							"const statuses = [\"available\", \"pending\", \"sold\"];\r",
+							"const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];\r",
+							"pm.environment.set(\"status\", JSON.stringify(randomStatus));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"const request = JSON.parse(pm.request.body.raw);\r",
+							"pm.environment.set(\"petID\", response.id);\r",
+							"pm.environment.set(\"createResponse\", response);\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Request id matches response id\", function () {\r",
+							"    pm.expect(request.id).to.eql(response.id);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Request category matches response category\", function () {\r",
+							"    pm.expect(request.category).to.eql(response.category);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Request pet status matches response pet status\", function () {\r",
+							"    pm.expect(request.status).to.eql(response.status);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": {{$randomInt}},\r\n    \"category\": {{category}},\r\n    \"name\": \"{{$randomFirstName}}\",\r\n    \"photoUrls\": [\r\n        \"{{$randomAnimalsImage}}\"\r\n    ],\r\n    \"tags\": [\r\n        {\r\n            \"id\": {{$randomInt}},\r\n            \"name\": \"{{$randomWord}}\"\r\n        }\r\n    ],\r\n    \"status\": {{status}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/v2/pet",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"v2",
+						"pet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find pet by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const createResponse = pm.environment.get(\"createResponse\");\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response id matches created id\", function () {\r",
+							"    pm.expect(createResponse.id).to.eql(response.id);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response category matches created category\", function () {\r",
+							"    pm.expect(createResponse.category).to.eql(response.category);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response pet status matches created pet status\", function () {\r",
+							"    pm.expect(createResponse.status).to.eql(response.status);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/v2/pet/{{petID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"v2",
+						"pet",
+						"{{petID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete pet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const createResponse = pm.environment.get(\"createResponse\");\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Deleted id matches created id\", function () {\r",
+							"    pm.expect(createResponse.id).to.eql(Number(response.message));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/v2/pet/{{petID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"v2",
+						"pet",
+						"{{petID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find pet by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/v2/pet/{{petID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"v2",
+						"pet",
+						"{{petID}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
